@@ -1,30 +1,33 @@
 import { List } from './ContactList.styled';
 import { useDispatch, useSelector } from 'react-redux';
-import { delContact, getphoneBooksValue } from 'redux/contactSlice';
-import { getFilter } from 'redux/filterSlice';
+import { delContact, selectContacts } from 'redux/contactSlice';
+import { selectFilter } from 'redux/filterSlice';
 
 export const ContactList = () => {
   const dispatch = useDispatch();
+  const filtered = useSelector(selectFilter);
+  const filterPhoneBook = useSelector(selectContacts);
 
-  const phoneBook = useSelector(getphoneBooksValue);
-
-  const filterPhoneBook = useSelector(getFilter);
-
-  const visibleContacts = phoneBook.filter(({ name }) =>
-    name.toLowerCase().includes(filterPhoneBook)
-  );
-
-  const deleteContact = contactId => {
-    dispatch(delContact(contactId));
+  const visibleContacts = event => {
+    const filteredContacts = filterPhoneBook.filter(contact =>
+      contact.name.toLowerCase().includes(filtered.toLowerCase())
+    );
+    return filteredContacts;
   };
+
   return (
     <List>
-      {visibleContacts.map(({ id, name, number }) => {
+      {visibleContacts().map(cont => {
         return (
-          <li key={id}>
-            <span>{name}</span>
-            <span>{number}</span>
-            <button type="button" onClick={() => deleteContact(id)}>
+          <li key={cont.id}>
+            <span>{cont.name}</span>
+            <span>{cont.number}</span>
+            <button
+              type="button"
+              onClick={() => {
+                dispatch(delContact(cont.id));
+              }}
+            >
               Delete
             </button>
           </li>
